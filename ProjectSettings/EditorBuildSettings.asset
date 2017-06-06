@@ -5,19 +5,19 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Selection.unity
     guid: 174aef226303b3c4b9add8474c1c8e3e
-  - enabled: 0
+  - enabled: 1
     path: Assets/First_Scenario.unity
     guid: d5d8ea94964c58d44b42bd0442f5ec1c
-  - enabled: 0
+  - enabled: 1
     path: Assets/Second_Scenario.unity
     guid: 23b04512d25d00c4cba41466b9672efe
-  - enabled: 0
+  - enabled: 1
     path: Assets/Bottleneck.unity
     guid: 6d4c61fd9920f3f47871b570c29d352b
-  - enabled: 0
+  - enabled: 1
     path: Assets/Parametrable.unity
     guid: 8f3d5c1f4ee20b54cb82ffc73ca1dd2e
   - enabled: 1
