@@ -858,7 +858,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8384c5b1308a9744f9f249a72c20590f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 400138, guid: 27f70412052dc2a4385641fe59a61cf4, type: 3}
+  prefab: {fileID: 4621430534980600, guid: 4bf1500bc15068b45bd72a92389787fc, type: 2}
   follow_but_: {fileID: 1988360220}
   save_but_: {fileID: 131091308}
   camera_height_: {fileID: 290535655}
