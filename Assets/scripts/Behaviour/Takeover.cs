@@ -27,15 +27,15 @@ namespace RVO
             RVO.Vector2 position = new RVO.Vector2(5, 5f);
             // face à face
             //RVO.Vector2 position = new RVO.Vector2(25, 5f);
-            sim_.addAgent(position, 0, false, false, 2f, 10, 2f, 2f, 0.35f,0.5f, new RVO.Vector2(0, 0));
+            sim_.addAgent(position, 0, false, false, 1f, 10, 2f, 2f, 0.35f,1f, new RVO.Vector2(0, 0));
             // dépassement
-            sim_.setAgentGoal(0, new RVO.Vector2(corridor_lenght * 1.5f, corridor_width / 2));
+            sim_.setAgentGoal(0, new RVO.Vector2(corridor_lenght * 1.5f, 5));
             // face à face
             //sim_.setAgentGoal(0, new RVO.Vector2(0,5));
 
             position = new RVO.Vector2(0, 5.1f);
-            sim_.addAgent(position, 0,true, false, 2f, 10,2f, 2f, 0.35f, 4f, new RVO.Vector2(0, 0));
-            sim_.setAgentGoal(1, new RVO.Vector2(corridor_lenght * 1.5f, corridor_width / 2 +0.1f));
+            sim_.addAgent(position, 0,true, false, 1f, 10,2f, 2f, 0.35f, 4f, new RVO.Vector2(0, 0));
+            sim_.setAgentGoal(1, new RVO.Vector2(corridor_lenght * 1.5f, 5.1f));
 
 
             colors.Add(new Color(0.000f, 0.000f, 0.804f));
@@ -69,7 +69,7 @@ namespace RVO
                 File.Create(name2).Dispose();
             using (TextWriter tw = new StreamWriter(name2))
             {
-                tw.WriteLine("Agent 0 position x \t Agent 0 position y \t Agent 1 position x \t Agent 1 position y ");
+                tw.WriteLine("Agent 0 position x \t Agent 0 position y \t Agent 0 leader \t Agent 1 position x \t Agent 1 position y  \t Agent 1 leader ");
             }
 
             sim_.setTimeStep(timeStep);
@@ -154,7 +154,7 @@ namespace RVO
                 //Debug.Log("Vitesse agent 1 " + Math.Sqrt(Math.Pow(sim_.getAgentVelocity(1).x_,2) + Math.Pow(sim_.getAgentVelocity(1).y_,2)));
                 using (TextWriter tw = new StreamWriter(name2, true))
                 {
-                    tw.WriteLine( sim_.getAgent(0).position_.x_ + "\t" + sim_.getAgent(0).position_.y_ + "\t" + sim_.getAgent(1).position_.x_ + "\t" + sim_.getAgent(1).position_.y_);
+                    tw.WriteLine( sim_.getAgent(0).position_.x_ + "\t" + sim_.getAgent(0).position_.y_ + "\t" + sim_.getAgent(0).agentNeighbors_.Count + "\t" + sim_.getAgent(1).position_.x_ + "\t" + sim_.getAgent(1).position_.y_ + "\t" + sim_.getAgent(1).agentNeighbors_.Count );
                 }
 
 

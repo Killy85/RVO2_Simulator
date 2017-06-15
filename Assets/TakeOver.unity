@@ -422,6 +422,7 @@ GameObject:
   - component: {fileID: 382821604}
   - component: {fileID: 382821603}
   - component: {fileID: 382821607}
+  - component: {fileID: 382821608}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -520,6 +521,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18b49d67c7f98784baea3bd7c327896f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &382821608
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 382821602}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8cb702e4970cf9841a82879f244312d3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!1 &533773468
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,7 +858,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8384c5b1308a9744f9f249a72c20590f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 4893460634363030, guid: 498e51aabfe95654892f123038f1f3ee, type: 2}
+  prefab: {fileID: 400138, guid: 27f70412052dc2a4385641fe59a61cf4, type: 3}
   follow_but_: {fileID: 1988360220}
   save_but_: {fileID: 131091308}
   camera_height_: {fileID: 290535655}

@@ -471,7 +471,7 @@ namespace RVO
                     return false;
                 }
             }
-            if (directionOpt)
+            if (!directionOpt)
             {
                 /* Optimize direction. */
                 if (optVelocity * lines[lineNo].direction > 0.0f)
@@ -538,11 +538,13 @@ namespace RVO
                     if (!linearProgram1(lines, i, radius, optVelocity, directionOpt, ref result))
                     {
                         result = tempResult;
+
                         return i;
                     }
                 }
 
             }
+
             return lines.Count;
         }
 

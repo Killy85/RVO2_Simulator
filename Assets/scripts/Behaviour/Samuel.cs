@@ -108,7 +108,7 @@ namespace RVO
             setupScenario();
             follow_but_.isOn = follow_;
 
-            int worker_num = (int)((corridor_length_-20) / (8 * ped_radius_)) + 2;
+            int worker_num = 4;// (int)((corridor_length_-20) / (8 * ped_radius_)) + 2;
             initializeWorker(worker_num);
 
 
@@ -126,19 +126,18 @@ namespace RVO
             name += num + "wave";
 
             name += "_agents.csv";
-            if (!File.Exists(name))
-            {
+
                 File.Create(name).Dispose();
                 string tmp = "";
-                for(int i =1; i < workers.Count - 2; ++i)
+                for(int i =0; i < workers.Count -1; ++i)
                 {
-                    tmp += "moyenne des vitesses de la zone " + i + "\t";
+                    tmp += "moyenne des vitesses de la zone " + (i+1) + "\t";
                 }
                 using (TextWriter tw = new StreamWriter(name))
                 {
                     tw.WriteLine(tmp);
                 }
-            }
+ 
 
             sim_.processObstacles();
             sim_.kdTree_.buildAgentTree();
@@ -164,19 +163,22 @@ namespace RVO
         {
             foreach (Agent a in sim_.agents_)
             {
-                if (a.position_.x_ <= 10)
+                if (a.position_.x_ <= corridor_length_/4)
                 {
                     workers[0].addAgent(a);
                 }
 
-                else if (a.position_.x_ >= corridor_length_ - 10)
+                else if (a.position_.x_ <= 2* corridor_length_ / 4)
                 {
-                    workers[worker_num - 1].addAgent(a);
+                    workers[ 1].addAgent(a);
                 }
-                else
+                else if (a.position_.x_ <= 3 * corridor_length_ / 4)
                 {
-                    int worker_id = (int)((a.position_.x_ - 10) / (8 * ped_radius_));
-                    workers[worker_id + 1].addAgent(a);
+                    workers[2].addAgent(a);
+                }else 
+                {
+                    workers[3].addAgent(a);
+                    Debug.Log("aimDair");
                 }
             }
         }
@@ -184,7 +186,7 @@ namespace RVO
 
         // Update is called once per frame
         void Update()
-        {
+        {/*
             for (int block = 0; block < workers.Count; ++block)
             {
                 doneEvents_[block].Reset();
@@ -192,7 +194,7 @@ namespace RVO
             }
 
             WaitHandle.WaitAll(doneEvents_);
-            updateWorker(workers.Count);
+            updateWorker(workers.Count);*/
             if (!reachedGoal())
             {
                 setPreferredVelocities();
@@ -246,8 +248,8 @@ namespace RVO
 
                     }
                      RVO.Vector2 vector2 = sim_.getAgentVelocity(i);
-                      agents[i].rotation = Quaternion.LookRotation(new Vector3(vector2.x_, 0, vector2.y_));
-                    setColor(i);
+                      //agents[i].rotation = Quaternion.LookRotation(new Vector3(vector2.x_, 0, vector2.y_));
+                    //setColor(i);
                 }
             }
             else
@@ -267,7 +269,7 @@ namespace RVO
             WaitHandle.WaitAll(doneEvents_);
 
             String tmp = "";
-            for (int i = 1; i < workers.Count-2; i++)
+            for (int i = 0; i < workers.Count-1; i++)
             {
                 tmp += Vector2.abs(workers[i].vit_moy)+ "\t";
 
@@ -279,7 +281,7 @@ namespace RVO
         }
 
 
-
+        
         void setColor(int i)
         {
             float max_vel = sim_.getAgentMaxSpeed();
