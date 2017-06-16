@@ -68,6 +68,7 @@ namespace RVO
 
 
         public Transform prefab;
+        public Transform human;
 
         public Samuel() : base() { }
         int ped_num_;
@@ -85,6 +86,8 @@ namespace RVO
         List<int> step_stop = new List<int>();
         public Toggle follow_but_;
         public Toggle save_but_;
+        public Toggle hum_but_;
+        public Boolean human_prefab = false;
         public Slider camera_height_;
         private IList<Worker> workers;
         private ManualResetEvent[] doneEvents_;
@@ -97,7 +100,7 @@ namespace RVO
             camera_height_.maxValue = 80;
             camera_height_.value = Camera.main.transform.position.y;
             agents = new List<Transform>();
-            Application.targetFrameRate = 20;
+            Application.targetFrameRate = 60;
             Application.runInBackground = true;
             sim_.setAgentDefaults(1f, 10, 1, 1, ped_radius_, 2, new Vector2(0, 0));
             ped_num_ = (int)(1.5f * corridor_width_ * (corridor_length_ + 10));
@@ -129,8 +132,10 @@ namespace RVO
 
                 File.Create(name).Dispose();
                 string tmp = "";
-                for(int i =0; i < workers.Count -1; ++i)
+            Debug.Log(workers.Count);
+                for(int i =0; i < workers.Count; i++)
                 {
+                Debug.Log(i);
                     tmp += "moyenne des vitesses de la zone " + (i+1) + "\t";
                 }
                 using (TextWriter tw = new StreamWriter(name))
@@ -178,7 +183,6 @@ namespace RVO
                 }else 
                 {
                     workers[3].addAgent(a);
-                    Debug.Log("aimDair");
                 }
             }
         }
@@ -186,7 +190,7 @@ namespace RVO
 
         // Update is called once per frame
         void Update()
-        {/*
+        {
             for (int block = 0; block < workers.Count; ++block)
             {
                 doneEvents_[block].Reset();
@@ -194,9 +198,31 @@ namespace RVO
             }
 
             WaitHandle.WaitAll(doneEvents_);
-            updateWorker(workers.Count);*/
+            updateWorker(workers.Count);
             if (!reachedGoal())
             {
+                if(hum_but_.isOn && !human_prefab)
+                {
+                    int range = agents.Count;
+                    for (int i=0; i <range;i++)
+                    {
+                        Destroy(agents[i].gameObject);
+                        addAgent(human, agents[i].position, sim_.getDefaultRadius(),i);
+                    }
+                    human_prefab = true;
+
+                }else if (!hum_but_.isOn && human_prefab)
+                {
+                    int range = agents.Count;
+                    for (int i = 0; i < range; i++)
+                    {
+                        Destroy(agents[i].gameObject);
+                        addAgent(prefab, agents[i].position, sim_.getDefaultRadius(), i);
+
+                    }
+                    human_prefab = false;
+                }
+
                 setPreferredVelocities();
                 doStep();
                 setAgentsProperties();
@@ -248,7 +274,7 @@ namespace RVO
 
                     }
                      RVO.Vector2 vector2 = sim_.getAgentVelocity(i);
-                      //agents[i].rotation = Quaternion.LookRotation(new Vector3(vector2.x_, 0, vector2.y_));
+                      agents[i].rotation = Quaternion.LookRotation(new Vector3(vector2.x_, 0, vector2.y_));
                     //setColor(i);
                 }
             }
@@ -269,7 +295,7 @@ namespace RVO
             WaitHandle.WaitAll(doneEvents_);
 
             String tmp = "";
-            for (int i = 0; i < workers.Count-1; i++)
+            for (int i = 0; i < workers.Count; i++)
             {
                 tmp += Vector2.abs(workers[i].vit_moy)+ "\t";
 

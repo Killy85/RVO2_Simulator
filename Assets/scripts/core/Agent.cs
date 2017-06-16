@@ -83,7 +83,7 @@ namespace RVO
 
             if (maxNeighbors_ > 0)
             {
-                rangeSq =RVOMath.sqr(neighborDist_/1.5f) + RVOMath.absSq(velocity_);// RVOMath.sqr(neighborDist_);
+                rangeSq =RVOMath.sqr(neighborDist_) + RVOMath.absSq(velocity_);// RVOMath.sqr(neighborDist_);
                 sim_.kdTree_.computeAgentNeighbors(this, ref rangeSq);
             }
         }

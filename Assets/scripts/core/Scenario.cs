@@ -108,5 +108,12 @@ namespace RVO
             agents.Add(Instantiate(prefab, position, Quaternion.identity));
             agents[agents.Count - 1].transform.localScale = new Vector3(radius_, radius_, radius_);
         }
+
+
+        public void addAgent(Transform prefab, Vector3 position, float radius_, int pos)
+        {
+            agents[pos] = (Instantiate(prefab, position, Quaternion.identity));
+            agents[pos].transform.localScale = new Vector3(radius_, radius_, radius_);
+        }
     }
 }
