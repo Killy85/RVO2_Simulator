@@ -176,6 +176,7 @@ namespace RVO
         {
 
             agents_ = new List<Agent>();
+            virtual_and_agents_ = new List<Agent>();
             globalTime_ = 0.0f;
             obstacles_ = new List<Obstacle>();
             timeStep_ = timeStep;
@@ -197,6 +198,7 @@ namespace RVO
         {
 
             agents_ = new List<Agent>();
+            virtual_and_agents_ = new List<Agent>();
             globalTime_ = 0.0f;
             obstacles_ = new List<Obstacle>();
             timeStep_ = timeStep;
@@ -370,7 +372,12 @@ namespace RVO
 
         public void initialize_virtual_and_agents()
         {
-            virtual_and_agents_ = agents_;
+            virtual_and_agents_ = new List<Agent>();
+            foreach(Agent a in agents_)
+            {
+                virtual_and_agents_.Add(a);
+            }
+
         }
 
         public void removeAgent(int i)
@@ -441,7 +448,7 @@ namespace RVO
                     }
                 }
 
-                kdTree_.buildAgentTree();
+                kdTree_.buildAgentTree(looped);
 
                 for (int block = 0; block < workers_.Length; ++block)
                 {
@@ -469,7 +476,8 @@ namespace RVO
             if(save)
                 new DataThread(this, looped, agents_[0].follows_);
             globalTime_ += timeStep_;
-
+            if (looped)
+                virtual_and_agents_ = new List<Agent>();
             pas++;
             return globalTime_;
         }

@@ -2,6 +2,7 @@
 using RVO;
 using System;
 using System.Collections.Generic;
+using Troschuetz.Random;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,7 +19,6 @@ class Parametrable : Scenario
     public GameObject panel;
     GameObject mainCam;
 
-    IList<Transform> agents;
     IList<Color> colors = new List<Color>();
 
 
@@ -45,16 +45,24 @@ class Parametrable : Scenario
         NormalDist normal = new NormalDist(1.2, 0.3);
         System.Random generator_ = new System.Random();
 
-    
 
-        NormalDist x_distribution = new NormalDist(0, corridor_lenght/2);
-        NormalDist y_distribution = new NormalDist(ped_radius_, corridor_width-1);
+        MT19937Generator generator = new MT19937Generator();
+        StandardGenerator sg = new StandardGenerator();
 
-        for (int i = 0; i <2; ++i)
+        ContinuousUniformDistribution x_distribution = new ContinuousUniformDistribution(generator);
+        NormalDistribution y_distribution = new NormalDistribution(generator);
+        y_distribution.Mu = corridor_width / 2;
+        y_distribution.Sigma = sim_.getDefaultRadius();
+           
+
+            for (int i = 0; i <agents_number; ++i)
         {
-                RVO.Vector2 position = new RVO.Vector2(i * (corridor_lenght-3)/15 , (corridor_width-2)/4 );
-                sim_.addAgent(position, 0, true, true, 15.0f, 10, 5.0f, 5.0f, i, 1.0f, new RVO.Vector2(0, 0));
-                goals.Add(new RVO.Vector2(corridor_lenght * 4,corridor_width/2));
+            float x = (float)x_distribution.NextDouble() * corridor_lenght % corridor_lenght;
+            float y = (float)((y_distribution.NextDouble() * corridor_width) - 9) % corridor_width;
+
+            RVO.Vector2 position = new RVO.Vector2(x, y );
+                sim_.addAgent(position, 0, true, true, 15.0f, 10, 5.0f, 5.0f, 1, 1.0f, new RVO.Vector2(0, 0));
+                sim_.setAgentGoal(i, new RVO.Vector2(corridor_lenght * 4,y));
 
         }
 
@@ -91,7 +99,7 @@ class Parametrable : Scenario
         cube2.transform.localScale = new Vector3(corridor_lenght - 0, 4, 1);
 
         sim_.processObstacles();
-        sim_.kdTree_.buildAgentTree();
+        sim_.kdTree_.buildAgentTree(false);
 
     }
 
@@ -109,26 +117,32 @@ class Parametrable : Scenario
         if (numAgent.text.ToString() != "")
         {
             agents_number = Int32.Parse(numAgent.text.ToString());
+            Debug.Log("Agents oui ");
         }
         else
         {
             agents_number = 40;
+            Debug.Log("Agents non ");
         }
         if (width.text.ToString() != "")
         {
             corridor_width = Int32.Parse(width.text.ToString());
+            Debug.Log("Width oui ");
         }
         else
         {
             corridor_width = 10;
+            Debug.Log("Width non ");
         }
         if (length.text.ToString() != "")
         {
            corridor_lenght = Int32.Parse(length.text.ToString());
+            Debug.Log("Length oui ");
         }
         else
         {
            corridor_lenght =30;
+            Debug.Log("Length non ");
         }
 
         panel.SetActive(false);
@@ -186,8 +200,8 @@ class Parametrable : Scenario
         if (!reachedGoal())
         {
             setPreferredVelocities();
-            doStep();
-            if(sim_.agents_.Count < agents_number) {
+            doStep(true);
+           /* if(sim_.agents_.Count < agents_number) {
                 int j = new System.Random().Next(1,3);
                 int k = new System.Random().Next(1, 8);
                 RVO.Vector2 position2 = new RVO.Vector2(0,k* corridor_width/8);
@@ -197,7 +211,7 @@ class Parametrable : Scenario
                 agents.Add(Instantiate(agent, new Vector3(position.x(), sim_.getAgentRadius(agents.Count - 1)/2, position.y()), Quaternion.identity));
                 agents[agents.Count-1].GetComponent<MeshRenderer>().material.color = colors[0];
                 agents[agents.Count - 1].localScale = new Vector3(sim_.getAgentRadius(agents.Count - 1), sim_.getAgentRadius(agents.Count - 1), sim_.getAgentRadius(agents.Count - 1));
-            }
+            }*/
 
             for (int i = 0; i < getNumAgents(); ++i)
             {

@@ -73,9 +73,9 @@ namespace RVO
             return sim_.getNumAgents();
         }
         /** Do a step of the simulator **/
-        internal void doStep()
+        internal void doStep(Boolean looped)
         {
-            sim_.DoStep(false);
+            sim_.DoStep(looped);
         }
         /** Return the position of the Agents[i] in order to update his position on the scene**/
         public RVO.Vector2 getPosition(int i)

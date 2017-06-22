@@ -36,8 +36,8 @@ class BottleNeck : Scenario
         setupScenario();
 
         //Creation of 2 walls on both side of the corridor
-        Instantiate(wall, new Vector3(-25, 12.5f, 35.5f), Quaternion.identity);
-        Instantiate(wall, new Vector3(-25, 12.5f, -35.5f), Quaternion.identity);
+        //Instantiate(wall, new Vector3(0, 0f, 0f), Quaternion.identity);
+        //Instantiate(wall, new Vector3(0,0f, 30f), Quaternion.identity);
 
         //For each agents added in setupScenario() , add a Unity Agent at the same position
         for (int i = 0; i < getNumAgents(); ++i)
@@ -63,7 +63,7 @@ class BottleNeck : Scenario
         {
             // Set the preffered velocities of agents in order to assume they are in the good direction
             setPreferredVelocities();
-            doStep();
+            doStep(false);
             for (int i = 0; i < getNumAgents(); ++i)
             {
                 RVO.Vector2 position = getPosition(i);
@@ -80,7 +80,7 @@ class BottleNeck : Scenario
                 //This one is to replace agents at the beginning of the corridor if they are at the end
                 if (position.x() >= 90.0f)
                 {
-                    setPosition(i, new RVO.Vector2(-130, position.y()));
+                    setPosition(i, new RVO.Vector2(0, position.y()));
                     position = getPosition(i);
                     agents[i].position = new Vector3(position.x(), sim_.getAgentRadius(i)/2, position.y());
                     RVO.Vector2 vector2 = sim_.getAgentVelocity(i);
@@ -116,18 +116,20 @@ class BottleNeck : Scenario
          * Specify the default parameters for agents that are subsequently
          * added.
          */
-        sim_.setAgentDefaults(15.0f, 10, 5.0f, 5.0f, 2.0f, 2.0f, new RVO.Vector2(0.0f, 0.0f));
+        sim_.setAgentDefaults(15.0f, 10, 1.0f, 5.0f, 2.0f, 2.0f, new RVO.Vector2(0.0f, 0.0f));
         //sim_.kdTree_.buildAgentTree(true);
         /*
          * Add agents, specifying their start position, and store their
          * goals on the opposite side of the environment.
          */
-        for (int i = 0; i < 12; ++i)
+        int cpt = 0;
+        for (int i = 0; i < 40; ++i)
         {
-            for (int j = 0; j < 8; ++j)
+            for (int j = 0; j <9; ++j)
             {
-                sim_.addAgent(new RVO.Vector2(-80.0f + 5 * i, -30 + j * 3), 0, true, true, 15.0f, 10, 5.0f, 5.0f, 5, 2.0f, new RVO.Vector2(0, 0));
-                goals.Add(new RVO.Vector2(100.0f, 0f));
+                sim_.addAgent(new RVO.Vector2( 5 + i, 2+ j * 3), 0, true, false, 15.0f, 10, 5.0f, 5.0f, 1, 2.0f, new RVO.Vector2(0, 0));
+                sim_.setAgentGoal(cpt,new RVO.Vector2(100.0f, 2 + j * 3));
+                cpt++;
 
             }
         }
@@ -145,27 +147,27 @@ class BottleNeck : Scenario
         //Creating a wall. The obstacle vertices have to be specified in the counter clock
         //order
         IList<RVO.Vector2> obstacle2 = new List<RVO.Vector2>();
-        obstacle2.Add(new RVO.Vector2(-150f, -38f));
-        obstacle2.Add(new RVO.Vector2(150f, -38f));
-        obstacle2.Add(new RVO.Vector2(150f, -33f));
-        obstacle2.Add(new RVO.Vector2(-150f, -33f));
+        obstacle2.Add(new RVO.Vector2(-150f, -5f));
+        obstacle2.Add(new RVO.Vector2(150f, -5f));
+        obstacle2.Add(new RVO.Vector2(150f, 0f));
+        obstacle2.Add(new RVO.Vector2(-150f, 0f));
         sim_.addObstacle(obstacle2);
 
 
         IList<RVO.Vector2> obstacle3 = new List<RVO.Vector2>();
-        obstacle3.Add(new RVO.Vector2(50f, 38f));
-        obstacle3.Add(new RVO.Vector2(90f, 15f));
-        obstacle3.Add(new RVO.Vector2(90f, 38f));
+        obstacle3.Add(new RVO.Vector2(70f, 30f));
+        obstacle3.Add(new RVO.Vector2(90f, 20f));
+        obstacle3.Add(new RVO.Vector2(90f, 30f));
         sim_.addObstacle(obstacle3);
 
         IList<RVO.Vector2> obstacle4 = new List<RVO.Vector2>();
-        obstacle4.Add(new RVO.Vector2(50f, -38f));
-        obstacle4.Add(new RVO.Vector2(90f, -38f));
-        obstacle4.Add(new RVO.Vector2(90f, -15f));
+        obstacle4.Add(new RVO.Vector2(90f, 0f));
+        obstacle4.Add(new RVO.Vector2(90f, 10f));
+        obstacle4.Add(new RVO.Vector2(70f, 0f));
         sim_.addObstacle(obstacle4);
 
         sim_.processObstacles();
-        sim_.kdTree_.buildAgentTree();
+        sim_.kdTree_.buildAgentTree(false);
 
     }
     /**<summary> This methode change the color of the UntyAgent according to 

@@ -54,6 +54,15 @@ namespace RVO
             internal float maxY_;
             internal float minX_;
             internal float minY_;
+
+            internal AgentTreeNode(int test)
+            {
+                begin_ = 0; end_ = 0; left_ = 0; right_ = 0;
+                maxX_ = 0;
+                maxY_ = 0;
+                minX_ = 0;
+                minY_ = 0;
+            }
         }
 
         /**
@@ -165,30 +174,46 @@ namespace RVO
         internal KdTree(RVOSimulator sim)
         {
             sim_ = sim;
+            agentTree_ = new AgentTreeNode[sim_.getNumAgents()];
         }
 
-        internal void buildAgentTree()
+        internal void buildAgentTree(Boolean looped)
         {
-            if (agents_ == null || agents_.Length != sim_.agents_.Count)
+            agents_ = new Agent[sim_.virtual_and_agents_.Count];
+            if (looped)
+            {
+
+                for(int i = 0; i< sim_.virtual_and_agents_.Count; i++)
+                {
+                    agents_[i] = sim_.virtual_and_agents_[i];
+                }
+                resetAgentTree(2 * agents_.Length - 1);
+            }
+            else
             {
                 agents_ = new Agent[sim_.agents_.Count];
 
-                for (int i = 0; i < agents_.Length; ++i)
-                {
-                    agents_[i] = sim_.agents_[i];
-                }
+                    for (int i = 0; i < sim_.agents_.Count; ++i)
+                    {
+                        agents_[i] = sim_.agents_[i];
+                    }
+                    
 
-                agentTree_ = new AgentTreeNode[2 * agents_.Length];
-
-                for (int i = 0; i < agentTree_.Length; ++i)
-                {
-                    agentTree_[i] = new AgentTreeNode();
-                }
+                
             }
-
-            if (agents_.Length != 0)
+            resetAgentTree(2 * agents_.Length - 1);
+            if (!(agents_.Length == 0))
             {
                 buildAgentTreeRecursive(0, agents_.Length, 0);
+            }
+        }
+
+        private void resetAgentTree(int v)
+        {
+            agentTree_ = new AgentTreeNode[v];
+            for(int i = 0; i < v; i++)
+            {
+                agentTree_[i] = new AgentTreeNode(3);
             }
         }
 

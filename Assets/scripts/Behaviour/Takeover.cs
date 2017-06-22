@@ -131,7 +131,7 @@ namespace RVO
             if (! reachedGoal())
             {
                 setPreferredVelocities();
-                doStep();
+                doStep(false);
              
                 for (int i = 0; i < getNumAgents(); ++i)
                 {

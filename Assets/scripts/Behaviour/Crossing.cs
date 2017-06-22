@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 class Crossing : Scenario
 {
@@ -9,7 +10,10 @@ class Crossing : Scenario
     public Transform agent_rose;
     public Transform agent_vert;
     public Transform wall;
-
+    public Toggle group;
+    public Toggle avoidance;
+    private Boolean group_b;
+    private Boolean avoidance_b;
 
 
     public Crossing() : base() { }
@@ -19,6 +23,8 @@ class Crossing : Scenario
     // Use this for initialization
     void Start()
     {
+        group_b = group.isOn;
+        avoidance_b = avoidance.isOn;
         Application.targetFrameRate = 60;
         agents = new List<Transform>();
         /* Set up the scenario. */
@@ -30,7 +36,9 @@ class Crossing : Scenario
         for (int i = 0; i < getNumAgents(); ++i)
         {
             RVO.Vector2 position = getPosition(i);
-            if (i < 1) { addAgent(agent_rose, new Vector3(position.x(),0f, position.y()),sim_.getDefaultRadius()); }
+            int mid = (group_b ? getNumAgents() / 2 : 1);
+
+            if (i < mid) { addAgent(agent_rose, new Vector3(position.x(),0f, position.y()),sim_.getDefaultRadius()); }
             else { addAgent(agent_vert, new Vector3(position.x(), 0f, position.y()), sim_.getDefaultRadius()); }
         }
         
@@ -39,12 +47,26 @@ class Crossing : Scenario
     // Update is called once per frame
     void Update()
     {
+        if(group_b != group.isOn ||avoidance_b != avoidance.isOn)
+        {
+            group_b = group.isOn;
+            avoidance_b = avoidance.isOn;
+            int range = agents.Count;
+            for (int i = 0; i < range; i++)
+            {
+                Destroy(agents[i].gameObject);
+            }
+            agents.Clear();
+            sim_ = new RVOSimulator();
+            Start();
+        }
+
         if (!reachedGoal())
         {
             /*Changing preferred velocity*/
             setPreferredVelocities();
             /* Doing a step*/
-            doStep();
+            doStep(false);
             /*Printing Time  * May harm performances */
             //Debug.Log(sim_.getGlobalTime());
             // This loop will change position,  facing direction of the 3D agents on the unity scene
@@ -128,21 +150,38 @@ class Crossing : Scenario
          * goals on the opposite side of the environment.
          */
          int agent_number = 0;
-        for (int i = 0; i < 1; ++i)
+        if (group_b)
         {
-            for (int j = 0; j <1; ++j)
+            for (int i = 0; i < 3; ++i)
             {
-                sim_.addAgent(new RVO.Vector2(-20.0f + sim_.getDefaultRadius()*2f* i, j * sim_.getDefaultRadius() * 2f), 0,false,true);
-                sim_.setAgentGoal(agent_number++, new RVO.Vector2(100.0f, j * sim_.getDefaultRadius() * 2));
+                for (int j = 0; j < 3; ++j)
+                {
+                    sim_.addAgent(new RVO.Vector2(-20.0f + sim_.getDefaultRadius() * 2f * i, 3 + j * sim_.getDefaultRadius() * 3f), 0, false, avoidance_b);
+                    sim_.setAgentGoal(agent_number++, new RVO.Vector2(100.0f, j * sim_.getDefaultRadius() * 2));
 
 
+                }
             }
         }
+        else
+        {
+            for (int i = 0; i < 1; ++i)
+            {
+                for (int j = 0; j < 1; ++j)
+                {
+                    sim_.addAgent(new RVO.Vector2(-20.0f + sim_.getDefaultRadius() * 2f * i, 4 + j * sim_.getDefaultRadius() * 2f), 0, false, avoidance_b);
+                    sim_.setAgentGoal(agent_number++, new RVO.Vector2(100.0f, j * sim_.getDefaultRadius() * 2));
+
+
+                }
+            }
+        }
+     
         for (int i = 0; i < 3; ++i)
         {
             for (int j = 0; j <3; ++j)
             {
-                sim_.addAgent(new RVO.Vector2(20.0f + sim_.getDefaultRadius() * 2f * i,( j * sim_.getDefaultRadius() * 2f )), 0, false,true);
+                sim_.addAgent(new RVO.Vector2(20.0f + sim_.getDefaultRadius() * 2f * i,(3+ j * sim_.getDefaultRadius() * 3f )), 0, false, avoidance_b);
                 sim_.setAgentGoal(agent_number++, new RVO.Vector2(-100.0f, j * sim_.getDefaultRadius() * 2));
 
             }
@@ -164,7 +203,7 @@ class Crossing : Scenario
         sim_.addObstacle(obstacle2);
 
         sim_.processObstacles();
-        sim_.kdTree_.buildAgentTree();
+        sim_.kdTree_.buildAgentTree(false);
 
     }
 }

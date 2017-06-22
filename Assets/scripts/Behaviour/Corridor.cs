@@ -34,12 +34,13 @@ class Corridor : Scenario
          * the scene script might respawn agent when when cross a certain position
          * This work has to be done in 
          */
-        for (int i = 0; i <20; ++i)
+        int cmpt = 0;
+        for (int i = 0; i <60; ++i)
         {
-            for (int j = 0; j < 6; ++j)
+            for (int j = 0; j < 12; ++j)
             {
-                sim_.addAgent(new RVO.Vector2(-50.0f + i, -25 + j *10), 0, true, true,15.0f,10,5.0f,5.0f,5,2.0f, new RVO.Vector2(0,0));
-                sim_.setAgentGoal(i,new RVO.Vector2(100.0f, 0f));
+                sim_.addAgent(new RVO.Vector2(-50.0f + i, -25 + j *3), 0, true, false,15.0f,10,5.0f,5.0f,1.35f,2.0f, new RVO.Vector2(0,0));
+                sim_.setAgentGoal(cmpt++,new RVO.Vector2(100.0f, 0f));
 
             }
         }
@@ -72,7 +73,7 @@ class Corridor : Scenario
         sim_.addObstacle(obstacle3);
 
         sim_.processObstacles();
-        sim_.kdTree_.buildAgentTree();
+        sim_.kdTree_.buildAgentTree(false);
 
     }
 
@@ -94,7 +95,7 @@ class Corridor : Scenario
         for (int i = 0; i < getNumAgents(); i++)
         {
             RVO.Vector2 position = getPosition(i);
-            agents.Add(Instantiate(agent, new Vector3(position.x(), 1.5f, position.y()), Quaternion.identity));
+            addAgent(agent, new Vector3(position.x(), 1.5f, position.y()));
             agents[i].localScale = new Vector3(sim_.getAgentRadius(i), sim_.getAgentRadius(i), sim_.getAgentRadius(i));
 
         }
@@ -137,7 +138,7 @@ class Corridor : Scenario
         if (!reachedGoal())
         {
             setPreferredVelocities();
-            doStep();
+            doStep(false);
 
             /* Output the current global time. */
             //print(Simulator.Instance.getGlobalTime());

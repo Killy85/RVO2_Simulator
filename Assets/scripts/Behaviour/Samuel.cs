@@ -27,7 +27,7 @@ namespace RVO
              * <param name="end">End.</param>
              * <param name="doneEvent">Done event.</param>
              */
-            internal Worker( ManualResetEvent doneEvent, RVOSimulator simulator, bool looped)
+            internal Worker(ManualResetEvent doneEvent, RVOSimulator simulator, bool looped)
             {
                 agents = new List<Agent>();
                 vit_moy = new Vector2();
@@ -41,7 +41,7 @@ namespace RVO
              *
              * <param name="obj">Unused.</param>
              */
-             internal void addAgent(Agent a)
+            internal void addAgent(Agent a)
             {
                 agents.Add(a);
             }
@@ -73,7 +73,7 @@ namespace RVO
         public Samuel() : base() { }
         int ped_num_;
         int model_type_ = 0;
-        bool follow_ =true;
+        bool follow_ = true;
         bool group_ = false;
         int fluxes_ = 1;
         float corridor_length_ = 50;
@@ -103,7 +103,7 @@ namespace RVO
             Application.targetFrameRate = 60;
             Application.runInBackground = true;
             sim_.setAgentDefaults(1f, 10, 1, 1, ped_radius_, 2, new Vector2(0, 0));
-            ped_num_ = (int)(1.5f * corridor_width_ * (corridor_length_ + 10));
+            ped_num_ = (int)(1.25f * corridor_width_ * (corridor_length_ + 10));
             //ped_num_ = 250;
             sim_.setTimeStep(time_step);
             transform.localScale = new Vector3(corridor_length_ / 10, 1, corridor_width_ / 10);
@@ -130,22 +130,20 @@ namespace RVO
 
             name += "_agents.csv";
 
-                File.Create(name).Dispose();
-                string tmp = "";
-            Debug.Log(workers.Count);
-                for(int i =0; i < workers.Count; i++)
-                {
-                Debug.Log(i);
-                    tmp += "moyenne des vitesses de la zone " + (i+1) + "\t";
-                }
-                using (TextWriter tw = new StreamWriter(name))
-                {
-                    tw.WriteLine(tmp);
-                }
- 
+            File.Create(name).Dispose();
+            string tmp = "";
+            for (int i = 0; i < workers.Count; i++)
+            {
+                tmp += "moyenne des vitesses de la zone " + (i + 1) + "\t";
+            }
+            using (TextWriter tw = new StreamWriter(name))
+            {
+                tw.WriteLine(tmp);
+            }
 
+            sim_.initialize_virtual_and_agents();
             sim_.processObstacles();
-            sim_.kdTree_.buildAgentTree();
+            sim_.kdTree_.buildAgentTree(true);
         }
 
         private void initializeWorker(int worker_num)
@@ -156,7 +154,7 @@ namespace RVO
             for (int block = 0; block < workers.Count; ++block)
             {
                 doneEvents_[block] = new ManualResetEvent(false);
-                workers[block] = new Worker(doneEvents_[block], sim_, false);
+                workers[block] = new Worker(doneEvents_[block], sim_, true);
 
             }
 
@@ -168,19 +166,20 @@ namespace RVO
         {
             foreach (Agent a in sim_.agents_)
             {
-                if (a.position_.x_ <= corridor_length_/4)
+                if (a.position_.x_ <= corridor_length_ / 4)
                 {
                     workers[0].addAgent(a);
                 }
 
-                else if (a.position_.x_ <= 2* corridor_length_ / 4)
+                else if (a.position_.x_ <= 2 * corridor_length_ / 4)
                 {
-                    workers[ 1].addAgent(a);
+                    workers[1].addAgent(a);
                 }
                 else if (a.position_.x_ <= 3 * corridor_length_ / 4)
                 {
                     workers[2].addAgent(a);
-                }else 
+                }
+                else
                 {
                     workers[3].addAgent(a);
                 }
@@ -191,6 +190,8 @@ namespace RVO
         // Update is called once per frame
         void Update()
         {
+
+
             for (int block = 0; block < workers.Count; ++block)
             {
                 doneEvents_[block].Reset();
@@ -201,17 +202,18 @@ namespace RVO
             updateWorker(workers.Count);
             if (!reachedGoal())
             {
-                if(hum_but_.isOn && !human_prefab)
+                if (hum_but_.isOn && !human_prefab)
                 {
                     int range = agents.Count;
-                    for (int i=0; i <range;i++)
+                    for (int i = 0; i < range; i++)
                     {
                         Destroy(agents[i].gameObject);
-                        addAgent(human, agents[i].position, sim_.getDefaultRadius(),i);
+                        addAgent(human, agents[i].position, sim_.getDefaultRadius(), i);
                     }
                     human_prefab = true;
 
-                }else if (!hum_but_.isOn && human_prefab)
+                }
+                else if (!hum_but_.isOn && human_prefab)
                 {
                     int range = agents.Count;
                     for (int i = 0; i < range; i++)
@@ -222,10 +224,19 @@ namespace RVO
                     }
                     human_prefab = false;
                 }
-
-                setPreferredVelocities();
-                doStep();
                 setAgentsProperties();
+                setPreferredVelocities();
+
+                sim_.initialize_virtual_and_agents();
+                for (int i = 0; i <getNumAgents(); i++)
+                {
+                        Vector2 agent_position = sim_.getAgentPosition(i);
+                        Vector2 p1 = agent_position + new Vector2(corridor_length_, 0);
+                        sim_.addVirtualAgent(0, p1);
+
+                }
+                doStep(true);
+
                 /* Output the current global time. */
                 //print(Simulator.Instance.getGlobalTime());
 
@@ -247,35 +258,23 @@ namespace RVO
                 Vector3 pos3 = Camera.main.transform.position;
                 Camera.main.transform.position = new Vector3(pos3.x, camera_height_.value, pos3.z);
 
-
-
+                int totot = getNumAgents();
                 for (int i = 0; i < getNumAgents(); ++i)
                 {
                     Vector2 position = sim_.getAgentPosition(i);
-                    if (!(sim_.agents_[i].velocity_ == new Vector2(0, 0)))
+                    agents[i].transform.position = new Vector3(position.x(), 0f, position.y());
+                    RVO.Vector2 vector2 = sim_.getAgentVelocity(i);
+                    agents[i].rotation = Quaternion.LookRotation(new Vector3(vector2.x_, 0, vector2.y_));
+                    if (human_prefab)
                     {
-                        step_stop[i] = 0;
-                    }
-                    else
-                    {
-                        step_stop[i]++;
-                    }
 
-                    if (step_stop[i] > 6)
-                    {
-                        sim_.agents_[i].position_ = new Vector2(-5, position.y());
-                        agents[i].transform.position = new Vector3(-5, 0f, position.y());
+                        if (Vector2.absSq(sim_.getAgentVelocity(i) * 4) > 1.5f)
+                            agents[i].GetComponent<Animator>().CrossFade("mixamo.com", 10, 1);
 
-
+                        agents[i].GetComponent<Animator>().speed = Vector2.absSq(sim_.getAgentVelocity(i) * 4);
                     }
-                    else
-                    {
-                        agents[i].transform.position = new Vector3(position.x(), 0f, position.y());
-
-                    }
-                     RVO.Vector2 vector2 = sim_.getAgentVelocity(i);
-                      agents[i].rotation = Quaternion.LookRotation(new Vector3(vector2.x_, 0, vector2.y_));
-                    //setColor(i);
+                    if (!human_prefab)
+                        setColor(i);
                 }
             }
             else
@@ -297,7 +296,7 @@ namespace RVO
             String tmp = "";
             for (int i = 0; i < workers.Count; i++)
             {
-                tmp += Vector2.abs(workers[i].vit_moy)+ "\t";
+                tmp += Vector2.abs(workers[i].vit_moy) + "\t";
 
             }
             using (TextWriter tw = new StreamWriter(name, true))
@@ -307,7 +306,7 @@ namespace RVO
         }
 
 
-        
+
         void setColor(int i)
         {
             float max_vel = sim_.getAgentMaxSpeed();
@@ -367,12 +366,12 @@ namespace RVO
             sim_.addObstacle(left_side);
 
 
-             IList<Vector2> begin_side = new List<Vector2> {
+            IList<Vector2> begin_side = new List<Vector2> {
              Vector2.rotation(new Vector2(-0, -50), corridor_angle_),
              Vector2.rotation(new Vector2(-0 , corridor_width_+50), corridor_angle_),
              Vector2.rotation(new Vector2(-10, corridor_width_ + 50.0f), corridor_angle_),
              Vector2.rotation(new Vector2(-10, 0), corridor_angle_) };
-             sim_.addObstacle(begin_side);
+            sim_.addObstacle(begin_side);
             // Process obstacles so that they are accounted for in the simulation.
             sim_.processObstacles();
         }
@@ -394,7 +393,7 @@ namespace RVO
             y_distribution.Sigma = sim_.getDefaultRadius();
             for (int ped = 0; ped < ped_num_; ped++)
             {  // Place Agent
-                float x = (float)x_distribution.NextDouble() * corridor_length_ % corridor_length_ ;
+                float x = (float)x_distribution.NextDouble() * corridor_length_ % corridor_length_;
                 float y = (float)((y_distribution.NextDouble() * corridor_width_) - 9) % corridor_width_;
 
                 Vector2 position = new Vector2(x, Math.Abs(y));
@@ -461,16 +460,6 @@ namespace RVO
                 new_goal = Vector2.rotation(new_goal, corridor_angle_);
                 // Set goal
                 sim_.setAgentGoal(i, new_goal);
-
-
-                if (local_pos.x() > corridor_length_ - 5)
-                {
-                    if (Vector2.abs(sim_.getAgentVelocity(i)) > (Vector2.abs(workers[0].vit_moy)))
-                    {
-                        sim_.setAgentVelocity(i, workers[0].vit_moy);
-                    }
-                }
-
 
                 // Set Agent Position (looped corridor)
                 // If the agent as reached the end of the corridor (case 1)
