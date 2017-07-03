@@ -143,6 +143,7 @@ namespace RVO
                 }
             }
             // Interact with each group of the list
+            
             for (int i = 0; i < groups.Count; ++i)
             {
                 GroupAgent group = groups[i];

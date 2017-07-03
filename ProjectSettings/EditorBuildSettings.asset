@@ -23,3 +23,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/TakeOver.unity
     guid: 803c7cdc99fd81a459301b0a32e77ba5
+  - enabled: 1
+    path: Assets/crossingFlux.unity
+    guid: 657a1dd2f97644d4ea9b5b10b398c9b8
